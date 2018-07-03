@@ -1,0 +1,7 @@
+languageCode = "en-us"
+title = "Kammin"
+baseurl = "https://k4mmin.github.io/blog/"
+newContentEditor = "vim"
+theme = "nofancy"
+pygmentsStyle = "native"
+publishDir = "docs"

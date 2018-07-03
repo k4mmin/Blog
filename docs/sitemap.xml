@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  
+  <url>
+    <loc>https://k4mmin.github.io/blog/post/Web-scrapping-Redmine/</loc>
+    <lastmod>2018-07-03T23:12:04+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://k4mmin.github.io/blog/about/</loc>
+    <lastmod>2018-06-23T13:33:53+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://k4mmin.github.io/blog/post/hello-Hugo/</loc>
+    <lastmod>2018-06-23T13:33:04+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://k4mmin.github.io/blog/categories/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://k4mmin.github.io/blog/</loc>
+    <lastmod>2018-07-03T23:12:04+02:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://k4mmin.github.io/blog/categories/misc/</loc>
+    <lastmod>2018-07-03T23:12:04+02:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://k4mmin.github.io/blog/post/</loc>
+    <lastmod>2018-07-03T23:12:04+02:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+</urlset>

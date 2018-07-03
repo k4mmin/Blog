@@ -1,0 +1,2 @@
+# blog
+Built with Hugo
