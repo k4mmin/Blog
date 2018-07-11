@@ -6,8 +6,140 @@
     <description>Recent content in Posts on Kammin</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 03 Jul 2018 23:12:04 +0200</lastBuildDate>
+    <lastBuildDate>Wed, 11 Jul 2018 20:41:27 +0200</lastBuildDate>
     <atom:link href="https://k4mmin.github.io/blog/post/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Análisis de vulnerabilidades en Docker: CoreOS Clair y Clair-scanner</title>
+      <link>https://k4mmin.github.io/blog/post/Analisis-vulnerabilidades-Docker/</link>
+      <pubDate>Wed, 11 Jul 2018 20:41:27 +0200</pubDate>
+      
+      <guid>https://k4mmin.github.io/blog/post/Analisis-vulnerabilidades-Docker/</guid>
+      <description>
+
+&lt;h2 id=&#34;análisis-de-vulnerabilidades-en-docker&#34;&gt;Análisis de vulnerabilidades en Docker&lt;/h2&gt;
+
+&lt;p&gt;Prueba de concepto sobre el análisis de vulnerabilidades en imágenes docker&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://k4mmin.github.io/blog/static/images/docker-secure-or-not.jpg&#34; alt=&#34;Docker&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;En este primer post sobre seguridad en contenedores voy a crear un tutorial básico de cómo analizar una imagen docker usando &lt;a href=&#34;https://github.com/coreos/clair&#34;&gt;CoreOS Clair&lt;/a&gt; y &lt;a href=&#34;https://github.com/arminc/clair-scanner&#34;&gt;Clair-scanner&lt;/a&gt;. En artículos futuros lo integraremos en un entorno de CI/CD.&lt;/p&gt;
+
+&lt;p&gt;El entorno está creado por contenedores para no necesitar instalaciones/dependencias y se compone de:
++ Base de datos PostgreSQL para almacenar la información de las vulnerabilidades (CVE).
++ Servicio Clair que analiza las capas que componen la imagen docker.
++ Cliente Clair-scanner que manda las tareas de análisis a Clair y devuelve el resultado.&lt;/p&gt;
+
+&lt;p&gt;La limitación de esta herramienta es que trabaja a nivel de paquetería, lo que instalados a mano como los tarballs no será comprobado.&lt;/p&gt;
+
+&lt;p&gt;Pasos a seguir para levantar el escenario:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;git clone https://github.com/k4mmin/docker-clair-scanner.git docker-clair-scanner
+cd $_
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Usar la última release de &lt;a href=&#34;https://github.com/coreos/clair/releases&#34;&gt;Clair&lt;/a&gt;(consultar el enlace para modificar al valor correcto) y añadir la contraseña de la base de datos (por defecto &amp;lsquo;password&amp;rsquo;).&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;export POSTGRES_PASSWORD=&amp;quot;ola&amp;quot;
+sed &amp;quot;s/clair:v2.0.1/clair:v2.0.3/&amp;quot; -i docker-compose.yml &amp;amp;&amp;amp; \
+sed &amp;quot;s/password=password/password=${POSTGRES_PASSWORD:-password}/&amp;quot; -i clair_config/config.yaml &amp;amp;&amp;amp; \
+sed &amp;quot;s/POSTGRES_PASSWORD: password/POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}/&amp;quot; -i docker-compose.yml
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Levantar la base de datos y poblarla.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;docker-compose up -d postgres
+
+curl -L https://gist.githubusercontent.com/BenHall/34ae4e6129d81f871e353c63b6a869a7/raw/5818fba954b0b00352d07771fabab6b9daba5510/clair.sql -o clair_config/clair.sql &amp;amp;&amp;amp; \
+docker run -it -v $(pwd)/clair_config:/sql/ --network &amp;quot;docker_scan&amp;quot; --link clair_postgres:clair_postgres \
+postgres:latest bash -c &amp;quot;PGPASSWORD=${POSTGRES_PASSWORD:-password} psql -h clair_postgres -U postgres &amp;lt; /sql/clair.sql&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Levantar el servidor Clair&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;docker-compose up -d clair
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Crear la imagen de clair-scanner&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;make build
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Ejecutar clair-scanner con la id de una o varias imágenes docker para obtener el resultado&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;source scan.sh &#39;image_id&#39;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Ejemplo con las imágenes centos:6 y debian:stretch&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;source scan.sh 70b5d81549ec
+2018/07/10 18:51:26 [INFO] ▶ Start clair-scanner
+2018/07/10 18:51:31 [INFO] ▶ Server listening on port 9279
+2018/07/10 18:51:31 [INFO] ▶ Analyzing 3cdae3dd0537787ca73f7603e5b823f886bff78679a28e53df412cc18f011c23
+2018/07/10 18:51:32 [INFO] ▶ Image [70b5d81549ec] contains NO unapproved vulnerabilities
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;source scan.sh 8626492fecd3
+[!] scanning debian_stretch
+2018/07/11 17:37:28 [INFO] ▶ Start clair-scanner
+2018/07/11 17:37:29 [INFO] ▶ Server listening on port 9279
+2018/07/11 17:37:29 [INFO] ▶ Analyzing e7faacaf1878064b6a1a48940d41f684aef4f57c98f8c213c85e3bbb1829356d
+2018/07/11 17:37:29 [WARN] ▶ Image [8626492fecd3] contains 6 total vulnerabilities
+2018/07/11 17:37:29 [ERRO] ▶ Image [8626492fecd3] contains 6 unapproved vulnerabilities
++------------+---------------------------+--------------+-----------------+------------------------------------------------------------+
+| STATUS     | CVE SEVERITY              | PACKAGE NAME | PACKAGE VERSION | CVE DESCRIPTION                                            |
++------------+---------------------------+--------------+-----------------+------------------------------------------------------------+
+| Unapproved | High CVE-2017-12424       | shadow       | 1:4.4-4.1       | In shadow before 4.5, the newusers tool could be           |
+|            |                           |              |                 | made to manipulate internal data structures in ways        |
+|            |                           |              |                 | unintended by the authors. Malformed input may lead        |
+|            |                           |              |                 | to crashes (with a buffer overflow or other memory         |
+|            |                           |              |                 | corruption) or other unspecified behaviors. This           |
+|            |                           |              |                 | crosses a privilege boundary in, for example, certain      |
+|            |                           |              |                 | web-hosting environments in which a Control Panel allows   |
+|            |                           |              |                 | an unprivileged user account to create subaccounts.        |
+|            |                           |              |                 | https://security-tracker.debian.org/tracker/CVE-2017-12424 |
++------------+---------------------------+--------------+-----------------+------------------------------------------------------------+
+| Unapproved | Medium CVE-2016-10228     | glibc        | 2.24-11+deb9u3  | The iconv program in the GNU C Library (aka glibc or       |
+|            |                           |              |                 | libc6) 2.25 and earlier, when invoked with the -c option,  |
+|            |                           |              |                 | enters an infinite loop when processing invalid multi-byte |
+|            |                           |              |                 | input sequences, leading to a denial of service.           |
+|            |                           |              |                 | https://security-tracker.debian.org/tracker/CVE-2016-10228 |
++------------+---------------------------+--------------+-----------------+------------------------------------------------------------+
+| Unapproved | Medium CVE-2017-12132     | glibc        | 2.24-11+deb9u3  | The DNS stub resolver in the GNU C Library (aka            |
+|            |                           |              |                 | glibc or libc6) before version 2.26, when EDNS             |
+|            |                           |              |                 | support is enabled, will solicit large UDP responses       |
+|            |                           |              |                 | from name servers, potentially simplifying off-path        |
+|            |                           |              |                 | DNS spoofing attacks due to IP fragmentation.              |
+|            |                           |              |                 | https://security-tracker.debian.org/tracker/CVE-2017-12132 |
++------------+---------------------------+--------------+-----------------+------------------------------------------------------------+
+| Unapproved | Low CVE-2017-15670        | glibc        | 2.24-11+deb9u3  | The GNU C Library (aka glibc or libc6) before 2.27         |
+|            |                           |              |                 | contains an off-by-one error leading to a heap-based       |
+|            |                           |              |                 | buffer overflow in the glob function in glob.c,            |
+|            |                           |              |                 | related to the processing of home directories              |
+|            |                           |              |                 | using the ~ operator followed by a long string.            |
+|            |                           |              |                 | https://security-tracker.debian.org/tracker/CVE-2017-15670 |
++------------+---------------------------+--------------+-----------------+------------------------------------------------------------+
+| Unapproved | Negligible CVE-2017-7246  | pcre3        | 2:8.39-3        | Stack-based buffer overflow in the pcre32_copy_substring   |
+|            |                           |              |                 | function in pcre_get.c in libpcre1 in PCRE 8.40            |
+|            |                           |              |                 | allows remote attackers to cause a denial of               |
+|            |                           |              |                 | service (WRITE of size 268) or possibly have               |
+|            |                           |              |                 | unspecified other impact via a crafted file.               |
+|            |                           |              |                 | https://security-tracker.debian.org/tracker/CVE-2017-7246  |
++------------+---------------------------+--------------+-----------------+------------------------------------------------------------+
+| Unapproved | Negligible CVE-2017-11164 | pcre3        | 2:8.39-3        | In PCRE 8.41, the OP_KETRMAX feature in the match function |
+|            |                           |              |                 | in pcre_exec.c allows stack exhaustion (uncontrolled       |
+|            |                           |              |                 | recursion) when processing a crafted regular expression.   |
+|            |                           |              |                 | https://security-tracker.debian.org/tracker/CVE-2017-11164 |
++------------+---------------------------+--------------+-----------------+------------------------------------------------------------+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Esta herramienta puede ser muy útil para ser integrada en el desarrollo de nuestros contenedores y para conocer qué imágenes base pueden resultar más seguras.&lt;/p&gt;
+
+&lt;h4 id=&#34;otras-herramientas-relacionadas&#34;&gt;Otras herramientas relacionadas&lt;/h4&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://thenewstack.io/assessing-the-state-current-container-security/&#34;&gt;https://thenewstack.io/assessing-the-state-current-container-security/&lt;/a&gt;&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Web scrapping with python</title>

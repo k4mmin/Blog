@@ -2,36 +2,36 @@
 <html lang="en">
 <head>
 
-
+  
   <meta charset="utf-8">
   <title>Web scrapping with python - Kammin</title>
   <meta name="description" content="Web scrapping with python">
   <meta name="author" content="">
 
-
+  
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-
+  
   <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
   <link rel="stylesheet" href="https://k4mmin.github.io/blog/css/fonts.css">
-
-
+  
+  
   <link rel="stylesheet" href="https://unpkg.com/purecss@0.6.1/build/pure-min.css" integrity="sha384-CCTZv2q9I9m3UOxRLaJneXrrqKwUNOzZ6NGEUMwHtShDJ+nCoiXJCAgi05KfkLGY" crossorigin="anonymous">
-
-
+  
+  
     <link rel="stylesheet" href="https://unpkg.com/purecss@0.6.1/build/grids-responsive-min.css">
-
+  
   <link rel="stylesheet" href="https://k4mmin.github.io/blog/css/custom.css">
 
-
-
+  
+  
   <link rel="stylesheet" href="https://k4mmin.github.io/blog/highlight/styles/default.css">
-
+  
   <script src="https://k4mmin.github.io/blog/highlight/highlight.pack.js"></script>
   <script>hljs.initHighlightingOnLoad();</script>
 
   <meta name="generator" content="Hugo 0.18.1" />
-
+  
 </head>
 <body>
 
@@ -39,10 +39,10 @@
     <div class="pure-u-1-24 pure-u-md-5-24"></div>
     <div class="pure-u-11-12 pure-u-md-5-8">
         <div class="desktop pure-menu pure-menu-horizontal nav-menu">
-
+            
             <a href="https://k4mmin.github.io/blog/" class="site-title pure-menu-heading">Kammin</a>
             <ul class="pure-menu-list">
-
+				
                 <li class="pure-menu-item">
                     <a href="https://k4mmin.github.io/blog/about/" class="pure-menu-link">About</a>
                 </li>
@@ -52,8 +52,8 @@
             <a href="/" class="pure-menu-heading" id="toggle-home">Kammin</a>
             <a href="#" id="toggle-btn">&#9776;</a>
             <ul class="pure-menu-list" id="toggle-content" style="display:none;">
-
-
+                
+				
                 <li class="pure-menu-item">
                     <a href="https://k4mmin.github.io/blog/about" class="pure-menu-link">About</a>
                 </li>
@@ -71,23 +71,23 @@
             <div class="post-title">
                 <p class="footnote">
                     <time class="">2018-07-03</time>
-
-
+		            
+                    
                     |
+                    
+                    
 
+                    
+                    categories:<a href="https://k4mmin.github.io/blog/categories/misc">misc</a> 
+                    
 
-
-
-                    categories:<a href="https://k4mmin.github.io/blog/categories/misc">misc</a>
-
-
-
+                    
                 </p>
                 <h1>Web scrapping with python</h1>
             </div>
 
             <div class="post-content">
-
+                
 
 <h2 id="web-scrapping-redmine-activity">Web scrapping Redmine activity</h2>
 
@@ -101,7 +101,7 @@
 
 <p>Un dia normal de curro. Tareas por aquí, correos por ayá, miro la hora y hay que imputar el tiempo de las tareas realizadas. ¿Es que eso no puede hacerlo otro?</p>
 
-<p><img src="/blog/images/homer_for_president.jpg" alt="Simspsons" /></p>
+<p><img src="/static/images/homer_for_president.jpg" alt="Simspsons" /></p>
 
 <p>Para facilitar el registro diario de horas en redmine voy a crear un pequeño script para ahorrar algo de tiempo y de camino repasar algunos conceptos como el uso de xpath.</p>
 
@@ -121,7 +121,7 @@
 
 <p>Estos tres primeros pasos podemos resumirlos si queremos centrarnos en el scrapping haciendo uso de las herramientas de desarrolladores de los navegadores Chrome o Firefox. Si hacemos login manualmente en la página desde la pestaña &lsquo;Network&rsquo; del navegador podemos obtener las cookies de sesión en forma de consulta curl y lanzarla en python con la librería &lsquo;os&rsquo;.</p>
 
-<p><img src="/blog/images/Chrome.png" alt="curl" /></p>
+<p><img src="/static/images/Chrome.png" alt="curl" /></p>
 
 <pre><code class="language-python">curl='''curl 'https://redmine.empresa.com/activity?&amp;show_issues=1&amp;user_id=3333' -H 'User-Agent: Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Mobile Safari/537.36' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8' -H 'Cache-Control: max-age=0' -H 'Cookie: _redmine_session=BAh7Ckkimuchasletrasynumerosdemaneraaleatoria946d49c7' -H 'Connection: keep-alive' --compressed --cacert certificate.pem &gt; redmine_activity.html'''
 
@@ -232,7 +232,7 @@ for elem in tasks_list:
 
 <p>Muchos certificados usados por los navegadores no están disponibles en el sistema (para usar estos en request exportar REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt). En este caso la solución fué descargar los certificados desde el navegador web y crear una cadena de certificados con ellos.</p>
 
-<p><img src="/blog/images/certs.png" alt="certificados" /></p>
+<p><img src="/static/images/certs.png" alt="certificados" /></p>
 
 <pre><code>cat COMODO.ca COMODO.ca2 &gt; certificate.pem
 </code></pre>
@@ -271,22 +271,22 @@ for elem in tasks_list:
         <div class="footer-content">
 		  <div class="pure-menu pure-menu-horizontal">
               <ul>
-
-
-
-
-
-
-
-
-
-
-
-
+			      
+				  
+                  
+          
+                  
+          
+                  
+          
+                  
+          
+                  
+          
               </ul>
               <a href="#" class="pure-menu-heading pull-right" id="gototop-btn">↑↑</a>
           </div>
-
+		  
 		</div>
 	  </div>
       <div class="pure-u-1-24 pure-u-md-1-6"></div>
@@ -316,3 +316,4 @@ for elem in tasks_list:
 
 </body>
 </html>
+
